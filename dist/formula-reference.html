@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+ <head>
+    <meta charset="UTF-8">
+    <title>Formula Reference</title>
+
+    <!-- JS and CSS Dependencies: -->
+
+    <!-- The expression language for formulas -->
+    <script src="expression-language.js"></script>
+
+    <!-- Responsive table (stacking) functionality -->
+    <script src="tablesaw.stackonly.js"></script>
+    <script src="tablesaw-init.js"></script>
+    <link rel="stylesheet" href="tablesaw.stackonly.css">
+
+    <!-- Base style sheet -->
+    <link rel="stylesheet" href="style.css">
+ </head>
+ <body>
+    <div class="padded">
+        <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
+            <thead>
+                <tr>
+                    <th>Operation</th>
+                    <th>Description</th>
+                    <th>Type Signature</th>
+                </tr>
+            </thead>
+            <tbody id="documentation-body">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Initialise functionality -->
+    <script>
+        var parser = initExpressions(function(term) {});
+        var rows = document.getElementById("documentation-body");
+        var descriptions = parser.options.descriptions;
+        descriptions.forEach(function(operation) {
+            var row = document.createElement("tr");
+
+            var op = document.createElement("td");
+            var sig = document.createElement("td"); 
+            var desc = document.createElement("td");
+
+            if (operation.fix === 'infix') {
+                var aType = operation.sig[0].split(': ')[1] || 'Any';
+                var bType = operation.sig[1].split(': ')[1] || 'Any';
+                op.innerHTML = operation.op;
+                sig.innerHTML = aType + ' ' + operation.op + ' ' + bType + ' ⇒ ' + operation.sig[2];
+            } else {
+                var arguments = operation.sig.slice(0, -1);
+                var resultType = operation.sig[operation.sig.length-1];
+                var names = arguments.map(function(arg) {
+                    return arg.split(': ')[0];
+                });
+                var types = arguments.map(function(arg) {
+                    if (arg === 'arguments...') {
+                        return 'Arguments'
+                    }
+                    return arg.split(': ')[1] || 'Any';
+                });
+                if (operation.fix === 'surround') {
+                    op.innerHTML = operation.op;
+                    sig.innerHTML = operation.op.replace('...', types.join(', ')) + ' ⇒ ' + resultType;
+                } else {
+                    op.innerHTML = operation.op;
+                    sig.innerHTML = operation.op + '(' + types.join(', ') + ') ⇒ ' + resultType;
+                }
+            }
+
+            desc.innerHTML = operation.text;
+
+            row.appendChild(op);
+            row.appendChild(desc);
+            row.appendChild(sig);
+
+            rows.appendChild(row);
+        });
+    </script>
+ </body>
+</html>

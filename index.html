@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+ <head>
+    <meta charset="UTF-8">
+    <!-- The title of the form -->
+    <title>xAPI Form Example</title>
+
+    <!-- JS and CSS Dependencies: -->
+    
+    <!-- xAPI base functionality -->
+    <script src="dist/tincan-min.js"></script>
+    <!-- Setting up the xAPI connection from launch data -->
+    <script src="dist/xapi-interface.js"></script>
+    <!-- Functionality for enabling form submission over xAPI -->
+    <script src="dist/xapi-form-submit.js"></script>
+
+    <!-- The expression language for formulas -->
+    <script src="dist/expression-language.js"></script>
+    <!-- Functionality for automatically updating formula fields of a form -->
+    <script src="dist/dependent-fields.js"></script>
+
+    <!-- Responsive table (stacking) functionality -->
+    <script src="dist/tablesaw.stackonly.js"></script>
+    <script src="dist/tablesaw-init.js"></script>
+    <link rel="stylesheet" href="dist/tablesaw.stackonly.css">
+
+    <!-- Base style sheet -->
+    <link rel="stylesheet" href="style.css">
+ </head>
+ <body>
+    <!--
+        CSS Quick Reference:
+
+            <input> size classes:
+            - full (100% width)
+            - large (24em width)
+            - medium (16em width)
+            - small (8em width)
+            
+            <input> functionality classes:
+            - formula (use the value as a computed formula)
+            
+            Layout (<div>) classes:
+            - center (place contents in the centre)
+            - small-block (a bordered block of content 20em wide)
+            - medium-block (a bordered block of content 40em wide)
+            
+            Table (<table>) classes:
+            - tablesaw (enable "tablesaw" responsive table functionality)
+            - tablesaw-stack (enable the "stacking" behaviour when the table is small)
+            N.B. also add the 'data-tablesaw-mode="stack"' attribute to the <table> tag
+
+            Table Cell (<td>) classes:
+            - large-align-right (align the cell contents to the right, 
+            when the screen is large - i.e. not collapsed)
+
+            General classes (most elements):
+            - padded (add 1em padding around the inside of the element)
+            - spaced (add 1em margin around the outside of the element)
+
+        Formulas:
+            see "./dist/formula-reference.html" (load in the browser) to see the full formula reference
+    -->
+
+    <!-- Data entry form -->
+    <form id="dataform" class="padded">
+        <div class="center">
+            <div class="small-block">
+                <label class="input-title" for="top-input">Input Label</label>
+                <input type="text" name="top-input" class="full">
+            </div>
+        </div>
+
+        <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
+            <!-- Table Header: The main column headings (which will also be those which stack when the table collapses) -->
+            <thead>
+                <tr> <!-- Table Row -->
+                    <th>Column A</th> <!-- Table (column) Heading -->
+                    <th>Column B</th>
+                    <th>Column C</th>
+                </tr>
+            </thead>
+
+            <!-- Table Body: The table rows -->
+            <tbody>
+                <tr> <!-- Table Row -->
+                    <td>Text A1</td> <!-- Table Data (cell) -->
+                    <td><input type="text" name="a1" class="full"></td>
+                    <td><input type="number" name="a2" class="medium"></td>
+                </tr>
+                <tr>
+                    <td>Text A2</td>
+                    <td><input type="text" name="b1" class="full"></td>
+                    <td><input type="number" name="b2" class="medium"></td>
+                </tr>
+            </tbody>
+
+            <!-- Table Footer: additional rows which do not show the column headings when collapsed -->
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td class="large-align-right">Total C:</td>
+                    <td><input type="text" value="a2 + b2" class="formula medium"></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Line separator -->
+        <hr>
+
+        <!-- Submit button (centred) -->
+        <div class="center">
+            <input type="submit" value="Submit" id="submit-button">
+        </div>
+
+        <!-- Saved status (centreed) -->
+        <div class="center spaced" id="status-message">
+            <div class="small-block">
+                Form has been submitted.
+            </div>
+        </div>
+    </form>
+
+    <!-- Initialise functionality -->
+    <script>
+        // Find the status box labelled with the id "status"
+        var statusBox = document.getElementById("status-message");
+
+        // Hide this box
+        statusBox.style.display = "none";
+
+        // Find the form element labelled with the id "dataform"
+        var form = document.getElementById("dataform");
+
+        // Find the submit button
+        var submitButton = document.getElementById("submit-button");
+
+        // Function to run when the form is about to be submitted
+        var onSubmitStart = function(formData) {
+            // Hide the status box
+            statusBox.style.display = "none";
+
+            // Disable the submit button
+            submitButton.disabled = true;
+        };
+
+        // Function to run when the form has been submitted
+        var onSubmitComplete = function(error, formData, response) {
+            if (error) {
+                // Submission couldn't complete
+
+                // Show error message
+                alert("Unable to submit form. Try again later.");
+                console.log(error, formData, response);
+            } else {
+                // Submission succeeded
+
+                // Show the status box
+                statusBox.style.display = "";
+            }
+
+            // Re-enable the submit button
+            submitButton.disabled = false;
+        };
+
+        // Initialise the xAPI functionality and submit the data
+        // over xAPI when this form is submitted
+        initXApiForm(form, onSubmitStart, onSubmitComplete);
+
+        // Initialise the formula calculation functionality
+        // so that formula fields are automatically updated
+        initDependentFields(form, "formula");
+    </script>
+ </body>
+</html>
