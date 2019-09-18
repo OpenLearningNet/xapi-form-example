@@ -9,7 +9,7 @@ function updateDependentFields(form, evaluator, dependentFields) {
     };
 }
 
-function initDependentFields(form, className) {
+function initDependentFields(form, className, onChange) {
     var parser = initExpressions(function(term) {
         var field = form.elements[term];
 
@@ -33,5 +33,8 @@ function initDependentFields(form, className) {
     updateDependentFields(form, evaluator, dependentFields);
     form.addEventListener("change", function(event) {
         updateDependentFields(event.currentTarget, evaluator, dependentFields);
+        if (onChange) {
+            onChange(event);
+        }
     });
 }
