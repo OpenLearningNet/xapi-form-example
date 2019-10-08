@@ -5,7 +5,7 @@ var LRS_CONFIG = initLrs();
 
 function completedStatement(config, formData) {
     var ol_extensions = {};
-    ol_extensions[OL_EXTENSIONS_ROOT + "form-data"] = formData;
+    ol_extensions[OL_EXTENSIONS_ROOT + "submission-data"] = formData;
     return new TinCan.Statement({
         actor: config.actor, // the actor data sent by OpenLearning
         object: {
