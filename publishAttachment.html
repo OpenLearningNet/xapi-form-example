@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- The title of the form -->
+    <title>xAPI Form Example</title>
+
+    <!-- JS and CSS Dependencies: -->
+
+    <!-- xAPI base functionality -->
+    <script src="dist/tincan-min.js"></script>
+    <!-- Setting up the xAPI connection from launch data -->
+    <script src="dist/xapi-interface.js"></script>
+    <!-- Functionality for publishing attachments over xAPI -->
+    <script src="dist/xapi-publish.js"></script>
+
+    <!-- Base style sheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div>
+      <canvas id="drawing" style="border: 1px solid black; box-sizing: border-box;"></canvas>
+    </div>
+    <div>
+      <textarea id="description" placeholder="Display Text" style="width: 640px; box-sizing: border-box;"></textarea>
+    </div>
+    <button id="submit-button" type="button">Publish</button>
+    <!-- Saved status (centred) -->
+    <div class="center spaced" id="status-message">
+      <div class="small-block">Drawing has been published.</div>
+    </div>
+
+    <!-- Initialise functionality -->
+    <script>
+      // Find the status box labelled with the id "status"
+      var statusBox = document.getElementById("status-message");
+
+      // Hide this box
+      statusBox.style.display = "none";
+
+      // Find the canvas element with the id "drawing"
+      var drawing = document.getElementById("drawing");
+
+      // Implement a basic drawing app
+      drawing.width = 640;
+      drawing.height = 480;
+
+      var context2d = drawing.getContext("2d");
+
+      var lastX;
+      var lastY;
+
+      function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top,
+        };
+      }
+
+      function draw(evt) {
+        var mousePos = getMousePos(drawing, evt);
+
+        context2d.moveTo(lastX, lastY);
+        context2d.lineTo(mousePos.x, mousePos.y);
+        context2d.stroke();
+
+        lastX = mousePos.x;
+        lastY = mousePos.y;
+      }
+
+      drawing.addEventListener("mousedown", function (evt) {
+        var mousePos = getMousePos(drawing, evt);
+
+        lastX = mousePos.x;
+        lastY = mousePos.y;
+        drawing.addEventListener("mousemove", draw);
+      });
+
+      window.addEventListener("mouseup", function (evt) {
+        drawing.removeEventListener("mousemove", draw);
+      });
+
+      // Find the submit button
+      var submitButton = document.getElementById("submit-button");
+
+      submitButton.addEventListener("click", function () {
+        // Hide the status box
+        statusBox.style.display = "none";
+
+        // Disable the submit button
+        submitButton.disabled = true;
+
+        var dataUri = drawing.toDataURL();
+        var displayText = document.getElementById("description").value;
+
+        var attachments = [
+          createSupportingMedia("image/png", dataUri, displayText, "A picture"),
+        ];
+
+        publishAttachments(attachments)
+          .then(function () {
+            // Show the status box
+            statusBox.style.display = "";
+            submitButton.disabled = false;
+          })
+          .catch(function (error) {
+            alert("Unable to publish. Try again later.");
+            console.log(error, attachments);
+            submitButton.disabled = false;
+          });
+      });
+    </script>
+  </body>
+</html>

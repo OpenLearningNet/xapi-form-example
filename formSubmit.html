@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- The title of the form -->
+    <title>xAPI Form Example</title>
+
+    <!-- JS and CSS Dependencies: -->
+
+    <!-- xAPI base functionality -->
+    <script src="dist/tincan-min.js"></script>
+    <!-- Setting up the xAPI connection from launch data -->
+    <script src="dist/xapi-interface.js"></script>
+    <!-- Functionality for enabling form submission over xAPI -->
+    <script src="dist/xapi-form-submit.js"></script>
+
+    <!-- Base style sheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Data entry form -->
+    <form id="dataform" class="padded">
+      <div class="center">
+        <div class="small-block">
+          <label class="input-title" for="top-input">Example Input</label>
+          <input type="text" name="exampleInput" class="full" />
+        </div>
+      </div>
+
+      <!-- Line separator -->
+      <hr />
+
+      <!-- Submit button (centred) -->
+      <div class="center">
+        <input type="submit" value="Submit" id="submit-button" />
+      </div>
+
+      <!-- Saved status (centred) -->
+      <div class="center spaced" id="status-message">
+        <div class="small-block">Form has been submitted.</div>
+      </div>
+    </form>
+
+    <!-- Initialise functionality -->
+    <script>
+      // Find the status box labelled with the id "status"
+      var statusBox = document.getElementById("status-message");
+
+      // Hide this box
+      statusBox.style.display = "none";
+
+      // Find the form element with the id "dataform"
+      var form = document.getElementById("dataform");
+
+      // Find the submit button
+      var submitButton = document.getElementById("submit-button");
+
+      // Function to run when the form is about to be submitted
+      var onSubmitStart = function (formData) {
+        // Hide the status box
+        statusBox.style.display = "none";
+
+        // Disable the submit button
+        submitButton.disabled = true;
+      };
+
+      // Function to run when the form has been submitted
+      var onSubmitComplete = function (error, formData, response) {
+        if (error) {
+          // Submission couldn't complete
+
+          // Show error message
+          alert("Unable to submit form. Try again later.");
+          console.log(error, formData, response);
+        } else {
+          // Submission succeeded
+
+          // Show the status box
+          statusBox.style.display = "";
+        }
+
+        // Re-enable the submit button
+        submitButton.disabled = false;
+      };
+
+      // Initialise the xAPI functionality and submit the data
+      // over xAPI when this form is submitted
+      initXApiForm(form, onSubmitStart, onSubmitComplete);
+    </script>
+  </body>
+</html>
